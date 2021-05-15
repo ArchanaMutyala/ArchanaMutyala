@@ -22,29 +22,43 @@ def upload():
     cartoonify(ImagePath)
     
 def cartoonify(ImagePath):
+    # read the image
     originalmage = cv2.imread(ImagePath)
     originalmage = cv2.cvtColor(originalmage, cv2.COLOR_BGR2RGB)
-   
-    ReSized1 = cv2.resize(originalmage, (860, 640))
     
-    grayScaleImage= cv2.cvtColor(originalmage, cv2.COLOR_BGR2GRAY)
-    ReSized2 = cv2.resize(grayScaleImage, (860, 640))
-    
-    smoothGrayScale = cv2.medianBlur(grayScaleImage, 5)
-    
-    ReSized3 = cv2.resize(smoothGrayScale, (860, 640))
-    
-    getEdge = cv2.adaptiveThreshold(smoothGrayScale, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
 
-    ReSized4 = cv2.resize(getEdge, (860, 640))
+   
+    ReSized1 = cv2.resize(originalmage, (460, 440))
+ 
+
+    #converting an image to grayscale
+    grayScaleImage= cv2.cvtColor(originalmage, cv2.COLOR_BGR2GRAY)
+    ReSized2 = cv2.resize(grayScaleImage, (460, 440))
+   
+
+
+    #applying median blur to smoothen an image
+    smoothGrayScale = cv2.medianBlur(grayScaleImage, 5)
+    ReSized3 = cv2.resize(smoothGrayScale, (460, 440))
     
+
+    #retrieving the edges by using thresholding technique
+    getEdge = cv2.adaptiveThreshold(smoothGrayScale, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
+    
+    #getEdge = cv2.Canny(smoothGrayScale, 100,200)
+
+    ReSized4 = cv2.resize(getEdge, (460, 440))
+
+    #applying bilateral filter 
     colorImage = cv2.bilateralFilter(originalmage, 9, 200, 200)
-    
-    ReSized5 = cv2.resize(colorImage, (860, 640))
-    
+    ReSized5 = cv2.resize(colorImage, (460, 440))
+   
+
     cartoonImage = cv2.bitwise_and(colorImage, colorImage, mask=getEdge)
 
-    ReSized6 = cv2.resize(cartoonImage, (860, 640))
+    ReSized6 = cv2.resize(cartoonImage, (460, 440))
+
+    # Plotting the whole transition
     images=[ReSized1, ReSized2, ReSized3, ReSized4, ReSized5, ReSized6]
 
     fig, axes = plt.subplots(3,2, figsize=(7,7), subplot_kw={'xticks':[], 'yticks':[]}, gridspec_kw=dict(hspace=0.1, wspace=0.1))
@@ -63,7 +77,7 @@ def save(ReSized6, ImagePath):
     extension=os.path.splitext(ImagePath)[1]
     path = os.path.join(path1, newName+extension)
     cv2.imwrite(path, cv2.cvtColor(ReSized6, cv2.COLOR_RGB2BGR))
-   
+    
 upload=Button(top,text="Cartoonify an Image",command=upload,padx=10,pady=5)
 upload.configure(background='#364156', foreground='white',font=('calibri',10,'bold'))
 upload.pack(side=TOP,pady=50)
